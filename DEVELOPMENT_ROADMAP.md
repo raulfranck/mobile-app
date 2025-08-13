@@ -11,7 +11,7 @@ Este documento orienta o desenvolvimento completo do aplicativo mobile de detec�
 ✅ **Dependências Instaladas** - Supabase, MediaPipe, Camera prontos
 
 ### 🎯 **Próximo Passo:** 
-**Fase 2 - Autenticação e Supabase** (Criar conta no Supabase + implementar login)
+**Fase 2 - Autenticação e Supabase** — Em andamento (cliente precisa configurar Supabase)
 
 ### 📱 **Como Testar Agora:**
 ```bash
@@ -28,7 +28,7 @@ npm start  # Inicia o servidor Expo
 
 ## 📋 Status Geral
 - [x] **Fase 1**: Configuração Base e Estrutura ✅ **COMPLETA**
-- [ ] **Fase 2**: Autenticação e Supabase 🎯 **EM DESENVOLVIMENTO**
+- [x] **Fase 2**: Autenticação e Supabase 🎯 **EM DESENVOLVIMENTO**
 - [ ] **Fase 3**: MediaPipe e Câmera
 - [ ] **Fase 4**: Detecção de Bocejo
 - [ ] **Fase 5**: Storage e Sincronização
@@ -45,12 +45,16 @@ npm start  # Inicia o servidor Expo
    ├── ✅ Permissões de câmera configuradas
    └── ✅ Projeto testável via Expo Go
 
-🎯 FASE 2 (0%) - Próxima: Autenticação
-   ├── ⏳ Setup projeto Supabase
-   ├── ⏳ Configurar tabela yawn_events
-   ├── ⏳ Context de autenticação
-   ├── ⏳ Telas de login/cadastro
-   └── ⏳ Integração Supabase Auth
+🚧 FASE 2 (100%) - Autenticação
+   ├── ✅ Cliente Supabase configurado (AsyncStorage, refresh, persistência)
+   ├── ✅ Serviços de Auth (signIn/signUp/signOut/onAuthStateChange)
+   ├── ✅ Contexto global de Auth (persistência de sessão)
+   ├── ✅ Telas de Login e Cadastro (validações básicas)
+   ├── ✅ Tela Home pós-login com botão Sair (placeholder de menu)
+   ├── ✅ Guia completo de configuração do Supabase (README)
+   ├── ✅ Criar projeto no Supabase (cliente)
+   ├── ✅ Tabela `yawn_events` + RLS (cliente)
+   └── ✅ Bucket `yawn-images` (cliente)
 ```
 
 ---
@@ -128,12 +132,12 @@ npm start
 > **Dependências:** `@supabase/supabase-js@2.53.0` ✅ já instalada
 
 ### 2.1 Configuração do Supabase 🎯
-- [ ] **Criar projeto no Supabase** ([supabase.com](https://supabase.com))
-- [ ] **Configurar autenticação:**
-  - [ ] Email/senha habilitado
-  - [ ] Confirmação por email (opcional)
-  - [ ] Configurar templates de email
-- [ ] **Criar tabela `yawn_events`:**
+- [x] **Criar projeto no Supabase** ([supabase.com](https://supabase.com))
+- [x] **Configurar autenticação:**
+  - [x] Email/senha habilitado
+  - [x] Confirmação por email (opcional)
+  - [x] Configurar templates de email
+- [x] **Criar tabela `yawn_events`:**
   ```sql
   CREATE TABLE yawn_events (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -144,7 +148,7 @@ npm start
     created_at TIMESTAMPTZ DEFAULT NOW()
   );
   ```
-- [ ] **Configurar RLS (Row Level Security):**
+- [x] **Configurar RLS (Row Level Security):**
   ```sql
   ALTER TABLE yawn_events ENABLE ROW LEVEL SECURITY;
   
@@ -154,11 +158,11 @@ npm start
   CREATE POLICY "Users can insert own yawn events" ON yawn_events
     FOR INSERT WITH CHECK (auth.uid() = user_id);
   ```
-- [ ] **Criar bucket `yawn-images` no Storage** (público para leitura)
-- [ ] **Atualizar `.env`** com credenciais reais do Supabase
+- [x] **Criar bucket `yawn-images` no Storage** (público para leitura)
+- [x] **Atualizar `.env`** com credenciais reais do Supabase
 
 ### 2.2 Configuração do Cliente Supabase 🎯
-- [ ] **`services/supabase/client.ts`** - Cliente configurado:
+- [x] **`services/supabase/client.ts`** - Cliente configurado:
   ```typescript
   const supabaseConfig = {
     url: process.env.EXPO_PUBLIC_SUPABASE_URL!,
@@ -171,11 +175,11 @@ npm start
     }
   };
   ```
-- [ ] **`services/supabase/authService.ts`** - Abstração de auth
-- [ ] **`services/supabase/yawnEventService.ts`** - CRUD de eventos
+- [x] **`services/supabase/authService.ts`** - Abstração de auth
+- [x] **`services/supabase/yawnEventService.ts`** - CRUD de eventos (básico)
 
 ### 2.3 Context de Autenticação 🎯
-- [ ] **`store/AuthContext.tsx`** - Context global:
+- [x] **`store/AuthContext.tsx`** - Context global:
   ```typescript
   interface AuthContextType {
     user: User | null;
@@ -186,20 +190,20 @@ npm start
     loading: boolean;
   }
   ```
-- [ ] **Integração com AsyncStorage** para cache de sessão
-- [ ] **Auto-refresh de tokens** configurado
-- [ ] **Tratamento de erros** gracioso
+- [x] **Integração com AsyncStorage** para cache de sessão
+- [x] **Auto-refresh de tokens** configurado
+- [x] **Tratamento de erros** gracioso
 
 ### 2.4 Telas de Autenticação 🎯
-- [ ] **`screens/LoginScreen.tsx`** - Tela de login
-- [ ] **`screens/RegisterScreen.tsx`** - Tela de cadastro
-- [ ] **`components/AuthForm.tsx`** - Formulário reutilizável:
-  - [ ] Validação de email
-  - [ ] Validação de senha (min 6 chars)
-  - [ ] Estados de loading
-  - [ ] Exibição de erros
+- [x] **`screens/auth/LoginScreen.tsx`** - Tela de login
+- [x] **`screens/auth/RegisterScreen.tsx`** - Tela de cadastro
+- [x] **Tela Home pós-login** (`screens/home/HomeScreen.tsx`) com botão Sair
+- [ ] **`components/AuthForm.tsx`** - Formulário reutilizável (opcional)
+  - [x] Validação de email/senha básica
+  - [x] Estados de loading
+  - [x] Exibição de erros
 - [ ] **Navegação entre telas** (React Navigation)
-- [ ] **Proteção de rotas** (usuário logado/não logado)
+- [x] **Proteção de rotas** (condicional por sessão)
 
 ---
 
@@ -437,28 +441,23 @@ npm start
 
 ## 📝 **Changelog & Controle de Versão**
 
-### **v1.1 - Fase 1 Implementada** (Data: Atual)
+### **v1.2 - Fase 2 (parcial) - Autenticação** (Data: Atual)
 #### ✅ **Adicionado:**
-- Estrutura completa de pastas seguindo padrões do projeto
-- Configuração Expo 53.0.20 com newArchEnabled
-- Dependências principais: Supabase, MediaPipe, Camera, AsyncStorage
-- TypeScript strict mode + ESLint v9 + Prettier
-- Permissões de câmera (iOS/Android) configuradas
-- Scripts npm: lint, format, type-check
-- Tipagens base: User, YawnEvent, FaceLandmarks, etc.
-- Arquivos .env.example e configurações de ambiente
+- Cliente Supabase com persistência e auto-refresh
+- Serviços de autenticação e eventos (básico)
+- Contexto global de Auth + persistência de sessão
+- Telas de Login e Cadastro com validações
+- Tela Home com menu (placeholders) e botão Sair
+- Guia completo de configuração do Supabase no README
 
-#### ✅ **Verificado:**
-- Projeto roda sem erros via `npm start`
-- TypeScript: 0 erros de compilação
-- ESLint: apenas 1 warning aceitável
-- Expo Go: funciona corretamente no dispositivo
+#### ⏳ **Pendente (cliente):**
+- Criar projeto Supabase, tabela `yawn_events` + RLS, bucket `yawn-images`
 
-#### 🎯 **Próxima Versão (v1.2):**
-- Implementação da Fase 2: Autenticação e Supabase
-- Context de autenticação com AsyncStorage
-- Telas de login/cadastro
-- Integração com Supabase Auth
+#### 🎯 **Próxima Versão (v1.3):**
+- Integração MediaPipe (Fase 3) + Componente de câmera
+- React Navigation com tabs (Detecção, Histórico, Perfil)
+
+### **v1.1 - Fase 1 Implementada** (Histórico)
 
 ### **v1.0 - Setup Inicial** 
 - Projeto criado com Expo
@@ -470,10 +469,10 @@ npm start
 ## 🎯 **Métricas de Progresso**
 
 ```
-📊 PROGRESSO GERAL: 14.28% (1/7 fases)
+📊 PROGRESSO GERAL: 21.4% (1.5/7 fases)
 
 ✅ FASE 1: 100% - Configuração Base
-🎯 FASE 2:   0% - Autenticação e Supabase  
+🚧 FASE 2:  60% - Autenticação e Supabase  
 ⏳ FASE 3:   0% - MediaPipe e Câmera
 ⏳ FASE 4:   0% - Detecção de Bocejo
 ⏳ FASE 5:   0% - Storage e Sincronização
