@@ -1,0 +1,105 @@
+---
+globs: **/components/**/*,**/screens/**/*
+---
+
+# Componentes e Screens - Padrões de Implementação
+
+## 📱 Estrutura de Screens Obrigatória
+```
+/screens/
+  /auth/
+    LoginScreen.tsx
+    RegisterScreen.tsx
+  /camera/
+    CameraScreen.tsx        # Tela principal de detecção
+    PermissionScreen.tsx    # Solicitar permissões
+  /session/
+    SessionScreen.tsx       # Dashboard da sessão ativa
+    ReportScreen.tsx        # Relatório pós-sessão
+  /profile/
+    ProfileScreen.tsx
+    SettingsScreen.tsx
+```
+
+## 🧩 Componentes Reutilizáveis Core
+```
+/components/
+  /ui/
+    Button.tsx              # Botão padrão com variantes
+    Card.tsx                # Cards para eventos/stats
+    LoadingSpinner.tsx      # Loading states
+    StatusIndicator.tsx     # Status da detecção
+  /camera/
+    CameraView.tsx          # Wrapper da câmera + MediaPipe
+    YawnCounter.tsx         # Contador de bocejos
+    SessionTimer.tsx        # Timer da sessão
+  /charts/
+    YawnFrequencyChart.tsx  # Gráfico de frequência
+    SessionSummary.tsx      # Resumo visual
+```
+
+## 🎨 Padrões de Design System
+- **Colors**: usar tema consistente (primary, secondary, accent)
+- **Typography**: hierarquia clara (h1, h2, body, caption)
+- **Spacing**: múltiplos de 8px (8, 16, 24, 32)
+- **Icons**: usar Expo Vector Icons consistentemente
+
+## ⚛️ Padrões de Componentes
+```typescript
+// Template obrigatório para componentes
+interface ComponentProps {
+  // Props sempre tipadas
+}
+
+const Component: React.FC<ComponentProps> = ({ ...props }) => {
+  // Hooks no topo
+  // Event handlers
+  // Render logic
+  
+  return (
+    <View style={styles.container}>
+      {/* JSX sempre indentado */}
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    // Styles sempre em StyleSheet
+  }
+});
+
+export default Component;
+```
+
+## 📱 Navigation Patterns
+- **Stack Navigator**: para fluxo auth e onboarding
+- **Tab Navigator**: para principais features (Camera, History, Profile)
+- **Modal**: para settings e reports
+- **Drawer**: evitar (manter simplicidade mobile)
+
+## 🔄 State Management Patterns
+- **useState**: para state local do componente
+- **useContext**: para estado global (Auth, Session)
+- **useReducer**: para estado complexo (session analytics)
+- **Custom Hooks**: abstrair lógica reutilizável
+
+## 📊 Performance Guidelines
+- **React.memo**: para componentes que recebem props estáveis
+- **useMemo/useCallback**: para cálculos custosos
+- **FlatList**: para listas de eventos (nunca ScrollView)
+- **Image optimization**: lazy loading para histórico de imagens
+
+## 🚨 Error Boundaries
+```typescript
+// Implementar para telas críticas
+<ErrorBoundary fallback={<ErrorScreen />}>
+  <CameraScreen />
+</ErrorBoundary>
+```
+
+## 📱 Responsive Design
+- **SafeAreaView**: sempre para iOS
+- **Dimensions**: adaptar para diferentes tamanhos
+- **Platform**: diferenças iOS/Android quando necessário
+- **Keyboard**: evitar overlap com KeyboardAvoidingView

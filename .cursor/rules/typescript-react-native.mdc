@@ -1,0 +1,47 @@
+---
+globs: *.ts,*.tsx
+---
+
+# TypeScript e React Native - Padrões de Código
+
+## 🎯 Convenções TypeScript
+- **Sempre** use tipagem explícita para props, state e parâmetros
+- Prefira `interface` para objetos e `type` para unions/primitivos
+- Use `enum` para constantes relacionadas
+- Exporte tipos junto com componentes
+
+## ⚛️ React Native - Boas Práticas
+- **Componentes**: PascalCase, sempre tipados
+- **Hooks customizados**: prefixo `use` + funcionalidade
+- **Context**: sufixo `Context` + Provider tipado
+- **Styles**: StyleSheet.create() sempre
+
+## 📱 Específico para Expo
+- Use `expo-*` packages quando disponível
+- Configure permissions no `app.json`
+- Teste em dispositivo físico para câmera/mediapipe
+
+## 🔒 Tratamento de Erros
+- **Sempre** trate erros de permissão de câmera
+- Fallback para modo offline quando API indisponível
+- Loading states para operações assíncronas
+- Error boundaries para componentes críticos
+
+## 📦 Imports - Ordem Obrigatória
+```typescript
+// 1. React/React Native
+import React from 'react';
+import { View, Text } from 'react-native';
+
+// 2. Bibliotecas externas
+import { Camera } from 'expo-camera';
+
+// 3. Componentes internos
+import Button from '@/components/Button';
+
+// 4. Services/Utils
+import { detectYawn } from '@/services/api';
+
+// 5. Types
+import type { YawnEvent } from '@/types';
+```

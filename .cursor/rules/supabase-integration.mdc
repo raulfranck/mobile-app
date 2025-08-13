@@ -1,0 +1,83 @@
+---
+description: Supabase authentication, database, and storage patterns
+---
+
+# Supabase - Autenticação, Database e Storage
+
+## 🔐 Autenticação
+- **Session Management**: Context API para estado global do usuário
+- **Auto-refresh**: configurar refresh automático de tokens
+- **Offline Support**: cache de sessão no AsyncStorage
+- **Error Handling**: tratar expiração de sessão graciosamente
+
+```typescript
+// Context de Autenticação obrigatório
+interface AuthContextType {
+  user: User | null;
+  session: Session | null;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  loading: boolean;
+}
+```
+
+## 🗃 Database - Tabela `yawn_events`
+
+**Schema obrigatório:**
+```sql
+CREATE TABLE yawn_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id),
+  timestamp TIMESTAMPTZ NOT NULL,
+  image_url TEXT,
+  keypoints JSONB NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+**RLS Policies:**
+- Usuários só podem ver seus próprios eventos
+- Insert/Update apenas para user_id próprio
+
+## 📁 Storage - Imagens de Bocejo
+- **Bucket**: `yawn-images` (público para leitura)
+- **Estrutura**: `{user_id}/{session_id}/{timestamp}.jpg`
+- **Compressão**: reduzir qualidade para 70% antes upload
+- **Cleanup**: remover imagens antigas (> 30 dias)
+
+## 🔄 Padrões de Uso
+```typescript
+// Service abstrato obrigatório
+class YawnEventService {
+  async saveYawnEvent(data: YawnEventData): Promise<YawnEvent> {
+    // 1. Upload da imagem
+    // 2. Insert no database
+    // 3. Rollback se falhar
+  }
+
+  async getUserYawnEvents(userId: string): Promise<YawnEvent[]> {
+    // Com filtros de data/sessão
+  }
+}
+```
+
+## 🚨 Tratamento de Offline
+- **Queue local**: armazenar eventos quando offline
+- **Sync automático**: quando conexão retornar
+- **Conflict resolution**: timestamp como tiebreaker
+- **Progress feedback**: mostrar status de sincronização
+
+## 🔧 Configuração Requerida
+```typescript
+// supabase/config.ts
+const supabaseConfig = {
+  url: process.env.EXPO_PUBLIC_SUPABASE_URL!,
+  anonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
+  auth: {
+    storage: AsyncStorage,
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: false
+  }
+};
+```

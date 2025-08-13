@@ -1,0 +1,83 @@
+---
+description: Yawn detection business logic and external API integration
+---
+
+# Detecção de Bocejo - Lógica de Negócio
+
+## 🎯 Regras de Negócio Core
+- **Frequência**: analisar a cada 10 frames capturados
+- **Validação**: 3+ frames consecutivos para confirmar bocejo
+- **Timeout**: máximo 30s entre análises para conservar bateria
+- **Threshold**: razão boca > 0.6 + confiança MediaPipe > 0.7
+
+## 🔄 Fluxo de Detecção
+```typescript
+interface YawnDetectionFlow {
+  captureFrame: () => Promise<FrameData>;
+  extractKeypoints: (frame: FrameData) => Promise<FaceLandmarks>;
+  analyzeYawn: (keypoints: FaceLandmarks) => Promise<YawnAnalysis>;
+  saveEvent: (analysis: YawnAnalysis) => Promise<void>;
+}
+```
+
+## 🌐 API Externa - Análise de Keypoints
+- **Endpoint**: `POST /api/analyze-yawn`
+- **Rate Limit**: máximo 6 req/min (1 a cada 10s)
+- **Timeout**: 5s máximo por request
+- **Retry**: 3 tentativas com exponential backoff
+
+```typescript
+interface YawnAnalysisRequest {
+  keypoints: FaceLandmarks;
+  deviceId: string;
+  timestamp: number;
+}
+
+interface YawnAnalysisResponse {
+  isYawning: boolean;
+  confidence: number;
+  mouthRatio: number;
+  processingTime: number;
+}
+```
+
+## 📊 Session Management
+- **Duração**: rastrear tempo total da sessão
+- **Eventos**: contar total de bocejos detectados
+- **Estatísticas**: calcular frequência (bocejos/hora)
+- **Relatório**: gerar ao final da sessão
+
+```typescript
+interface YawnSession {
+  id: string;
+  userId: string;
+  startTime: Date;
+  endTime?: Date;
+  totalYawns: number;
+  avgFrequency: number;
+  events: YawnEvent[];
+}
+```
+
+## 🚨 Tratamento de Falhas
+- **API Offline**: salvar localmente + sync posterior
+- **Falha MediaPipe**: reiniciar pipeline + notificar usuário
+- **Storage cheio**: alertar + limpar eventos antigos
+- **Battery baixa**: reduzir frequência de análise
+
+## 📱 UX/UI Requirements
+- **Loading**: indicador durante processamento de frame
+- **Status**: mostrar se detecção está ativa
+- **Counter**: exibir número de bocejos da sessão
+- **Feedback**: vibração sutil quando bocejo detectado
+
+## 🔧 Configurações Ajustáveis
+```typescript
+interface DetectionSettings {
+  sensitivity: 'low' | 'medium' | 'high'; // afeta threshold
+  frequency: number; // frames entre análises (padrão: 10)
+  enableVibration: boolean;
+  saveImages: boolean;
+  offlineMode: boolean;
+}
+```

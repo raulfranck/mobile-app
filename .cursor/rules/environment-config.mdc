@@ -1,0 +1,130 @@
+---
+globs: *.json,*.config.*,*.env*
+---
+
+# Environment e Configurações - Setup Obrigatório
+
+## 📱 Expo Configuration (app.json)
+```json
+{
+  "expo": {
+    "name": "Yawn Detector",
+    "slug": "yawn-detector",
+    "platforms": ["ios", "android"],
+    "plugins": [
+      ["expo-camera", {
+        "cameraPermission": "This app uses camera to detect yawns through facial analysis."
+      }],
+      ["expo-media-library", {
+        "photosPermission": "Allow app to save yawn detection images.",
+        "savePhotosPermission": "Allow app to save yawn detection images."
+      }]
+    ],
+    "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app uses camera to detect yawns through facial analysis.",
+        "NSMicrophoneUsageDescription": "Required for camera functionality."
+      }
+    },
+    "android": {
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    }
+  }
+}
+```
+
+## 🔧 Environment Variables
+```typescript
+// .env obrigatório
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+EXPO_PUBLIC_API_BASE_URL=https://your-api.com
+EXPO_PUBLIC_API_TIMEOUT=5000
+EXPO_PUBLIC_MEDIAPIPE_MODEL_PATH=/assets/models/
+EXPO_PUBLIC_ENABLE_DEBUG_LOGS=true
+```
+
+## 📦 Package.json - Dependencies Críticas
+```json
+{
+  "dependencies": {
+    "expo": "~50.0.0",
+    "expo-camera": "~14.0.0",
+    "react-native-mediapipe": "latest",
+    "@supabase/supabase-js": "^2.38.0",
+    "react-native-async-storage": "^1.19.0",
+    "expo-vector-icons": "^13.0.0"
+  },
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "build:android": "eas build --platform android",
+    "build:ios": "eas build --platform ios"
+  }
+}
+```
+
+## 🎯 TypeScript Config (tsconfig.json)
+```json
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./app/*"],
+      "@/components/*": ["./components/*"],
+      "@/screens/*": ["./screens/*"],
+      "@/services/*": ["./services/*"],
+      "@/types/*": ["./types/*"],
+      "@/utils/*": ["./lib/utils/*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ]
+}
+```
+
+## 🚨 Configurações Críticas de Build
+- **EAS Build**: configurar para usar react-native-mediapipe
+- **Metro Config**: incluir assets de modelos ML
+- **Bare Workflow**: necessário para react-native-mediapipe
+- **Bundle Size**: otimizar removendo dev dependencies
+
+## 📱 Platform-Specific Setup
+### iOS
+- **Xcode**: versão 14.3+
+- **iOS Target**: 13.0+
+- **Camera Permission**: obrigatório no Info.plist
+- **Background Modes**: se necessário para processamento
+
+### Android
+- **API Level**: mínimo 26 (Android 8.0)
+- **Permissions**: CAMERA + STORAGE
+- **NDK**: para react-native-mediapipe
+- **Proguard**: configurar para manter classes ML
+
+## 🔧 Development Setup
+```bash
+# Setup obrigatório
+npm install
+npx expo install --fix
+npx expo prebuild
+
+# Para desenvolvimento
+npm run start
+npm run ios     # ou android
+```
+
+## 📊 Monitoring & Analytics
+- **Sentry**: para crash reporting
+- **Flipper**: para debugging (dev only)
+- **Performance**: monitorar FPS da câmera
+- **Analytics**: eventos de uso anonimizados

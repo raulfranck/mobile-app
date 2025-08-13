@@ -1,0 +1,66 @@
+---
+description: react-native-mediapipe configuration and face detection patterns
+---
+
+# React Native MediaPipe - Configuração e Padrões
+
+## 🎯 Configuração Obrigatória
+- **Face Detection Model**: Usar `face_detection` com confidence > 0.7
+- **Face Landmarks**: Capturar keypoints completos (468 pontos)
+- **Performance**: Processar a cada 10 frames (não todos)
+- **Resolução**: 640x480 para balance performance/precisão
+
+## 📱 Implementação de Câmera
+```typescript
+// Sempre verificar permissões primeiro
+const requestCameraPermission = async () => {
+  const { status } = await Camera.requestCameraPermissionsAsync();
+  return status === 'granted';
+};
+
+// Configuração do MediaPipe
+const mediapipeConfig = {
+  runningMode: 'VIDEO',
+  maxNumFaces: 1,
+  minDetectionConfidence: 0.7,
+  minTrackingConfidence: 0.5
+};
+```
+
+## 🔍 Keypoints para Detecção de Bocejo
+- **Pontos da boca**: índices 0, 17, 18, 200 (abertura vertical)
+- **Razão de aspecto**: altura_boca / largura_boca
+- **Threshold**: razão > 0.6 indica possível bocejo
+- **Validação**: manter estado por 3+ frames consecutivos
+
+## ⚡ Otimização de Performance
+- **Throttling**: processar apenas 1 de cada 10 frames
+- **Worker Thread**: executar detecção em background
+- **Memory Management**: limpar buffers de frame não utilizados
+- **Battery**: pausar detecção quando app em background
+
+## 🚨 Tratamento de Erros
+- **Camera não disponível**: fallback para modo simulação
+- **MediaPipe falha**: reiniciar pipeline automaticamente
+- **Performance baixa**: reduzir resolução dinamicamente
+- **Memory leak**: implementar cleanup nos useEffect
+
+## 📊 Estrutura dos Keypoints
+```typescript
+interface FaceLandmarks {
+  landmarks: Array<{
+    x: number;
+    y: number;
+    z: number;
+  }>;
+  confidence: number;
+  timestamp: number;
+}
+
+interface YawnDetectionData {
+  landmarks: FaceLandmarks;
+  mouthRatio: number;
+  isYawning: boolean;
+  frameCount: number;
+}
+```

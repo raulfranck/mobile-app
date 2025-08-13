@@ -1,0 +1,45 @@
+---
+alwaysApply: true
+---
+
+# 🧠 Projeto Detector de Bocejo - Estrutura e Padrões
+
+Este é um aplicativo mobile híbrido (Android/iOS) para detectar bocejos usando React Native + Expo.
+
+## 📱 Stack Tecnológica Principal
+- **React Native (Expo + Bare Workflow)**: Interface híbrida
+- **Supabase**: Autenticação, PostgreSQL e Storage
+- **react-native-mediapipe**: Detecção de keypoints faciais
+- **Node.js/Express API**: Processamento de keypoints para detecção de bocejo
+
+## 🗂 Estrutura de Pastas Obrigatória
+
+```
+/app/
+/components/       → Componentes reutilizáveis
+/screens/          → Telas principais do app
+/services/
+  /api/            → Comunicação com APIs externas
+  /supabase/       → Integração com Supabase
+/lib/
+  /mediapipe/      → Configuração react-native-mediapipe
+  /utils/          → Funções utilitárias
+/store/            → Contextos/estado global (Auth, Session)
+/assets/           → Imagens, fontes, etc.
+/types/            → Tipagens TypeScript compartilhadas
+```
+
+## 🔄 Fluxo da Aplicação
+1. Login via Supabase
+2. Permissão de câmera
+3. Captura com mediapipe (keypoints faciais)
+4. Envio para API externa a cada 10 frames
+5. Se bocejo detectado: captura imagem + salva no Supabase
+6. Geração de relatório da sessão
+
+## 📐 Padrões Obrigatórios
+- **TypeScript** em 100% do código
+- Modularização por domínio
+- Hooks e Context API para estado
+- Abstração de APIs no `services/`
+- Tratamento de fallback offline
