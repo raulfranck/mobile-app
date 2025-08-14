@@ -23,7 +23,8 @@
     "react-native": "0.79.5",
     "react-native-fs": "^2.20.0",
     "react-native-mediapipe": "^0.6.0",
-    "expo-media-library": "~17.1.7"
+    "expo-media-library": "~17.1.7",
+    "onnxruntime-react-native": "^1.19.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
