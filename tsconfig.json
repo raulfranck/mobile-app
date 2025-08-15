@@ -9,6 +9,7 @@
       "@/screens/*": ["./screens/*"],
       "@/services/*": ["./services/*"],
       "@/store/*": ["./store/*"],
+      "@/lib/*": ["./lib/*"],
       "@/types": ["./types/index.ts"],
       "@/types/*": ["./types/*"],
       "@/utils/*": ["./lib/utils/*"]

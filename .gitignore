@@ -17,6 +17,13 @@ expo-env.d.ts
 *.p12
 *.key
 *.mobileprovision
+android/.gradle/
+android/.idea/
+android/**/build/
+android/local.properties
+android/app/debug.keystore
+*.apk
+*.aab
 
 # Metro
 .metro-health-check*
@@ -31,7 +38,9 @@ yarn-error.*
 *.pem
 
 # local env files
-# .env*.local
+.env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo

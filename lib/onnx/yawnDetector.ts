@@ -1,4 +1,7 @@
-import * as ort from 'onnxruntime-react-native';
+// Import dinâmico para evitar crash em Expo Go (native module indisponível)
+// O runtime é carregado somente quando initializeFromUri for chamado
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let ort: any;
 
 type Landmark = { x: number; y: number; z?: number };
 
@@ -64,7 +67,8 @@ export interface DetectionResult {
 }
 
 export class YawnDetector {
-  private session: ort.InferenceSession | null = null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private session: any | null = null;
   private inputName: string | null = null;
   private readonly window: number[][] = [];
   private readonly windowSize: number;
@@ -77,6 +81,20 @@ export class YawnDetector {
    * Inicializa a sessão ONNX a partir de um URI do modelo (arquivo local no dispositivo)
    */
   async initializeFromUri(modelUri: string): Promise<void> {
+    if (!ort) {
+      try {
+        ort = await import('onnxruntime-react-native');
+      } catch (e) {
+        throw new Error(
+          'ONNX Runtime não disponível no ambiente atual. Use um Dev Client (expo prebuild + run:android/ios).',
+        );
+      }
+    }
+    if (!ort?.InferenceSession) {
+      throw new Error(
+        'ONNX Runtime não inicializou. Certifique-se de usar um Dev Client (não Expo Go).',
+      );
+    }
     this.session = await ort.InferenceSession.create(modelUri);
     const names: string[] | undefined = (this.session as unknown as { inputNames?: string[] }).inputNames;
     this.inputName = names && names.length > 0 ? names[0] : null;
@@ -107,12 +125,13 @@ export class YawnDetector {
     }
 
     const tensor = new ort.Tensor('float32', inputData, [1, this.windowSize, featureSize]);
-    const feeds: Record<string, ort.Tensor> = {};
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const feeds: Record<string, any> = {};
     const feedName = this.inputName ?? 'input';
     feeds[feedName] = tensor;
 
     const outputMap = await this.session.run(feeds);
-    const first = Object.values(outputMap)[0] as ort.Tensor;
+    const first = Object.values(outputMap)[0] as { data: Float32Array };
     const data = Array.from(first.data as Float32Array);
 
     let predicted: 0 | 1 | 2 = 0;

@@ -9,6 +9,15 @@ Instale o runtime ONNX para React Native:
 npm install onnxruntime-react-native
 ```
 
+Adapte o Metro para suportar `.onnx`:
+```js
+// metro.config.js
+const { getDefaultConfig } = require('expo/metro-config');
+const config = getDefaultConfig(__dirname);
+config.resolver.assetExts.push('onnx');
+module.exports = config;
+```
+
 ## 2) Colocar o modelo no app
 
 - Recomendado: mover o arquivo para `assets/models/model_lstm_3_45_euclidean.onnx`.
