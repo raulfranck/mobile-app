@@ -104,10 +104,57 @@ EXPO_PUBLIC_ENABLE_DEBUG_LOGS=true
 Após editar o `.env`, reinicie o servidor (`npm start`).
 
 ## Executando o projeto
-```bash
-npm start
-# Escaneie o QR Code com o aplicativo Expo Go
-```
+
+Há dois modos: Expo Go (sem nativos) e Development Build (com nativos). Este projeto usa câmera + ONNX, então você PRECISA usar Development Build em dispositivo físico Android. Emulador Android geralmente não oferece câmera funcional para este caso.
+
+### 1) Primeira execução (configuração inicial)
+1. Requisitos no Windows:
+   - JDK 17 instalado e no PATH (`java -version` → 17.x)
+   - Android SDK instalado (Android Studio) e variáveis definidas:
+     - `ANDROID_HOME`/`ANDROID_SDK_ROOT` → `C:\Users\SEU_USUARIO\AppData\Local\Android\Sdk`
+     - PATH inclui: `%ANDROID_HOME%\platform-tools`, `%ANDROID_HOME%\emulator`, `%ANDROID_HOME%\cmdline-tools\latest\bin`
+   - ADB acessível (`adb devices`)
+2. Instale dependências e gere nativos:
+   ```bash
+   npm install
+   npx expo install --fix
+   npx expo prebuild
+   ```
+3. Conecte um dispositivo Android físico com Depuração USB ativada (emulador não serve para câmera neste projeto):
+   - Ative “Opções do desenvolvedor” e “Depuração USB”
+   - Se necessário, defina USB como “Transferência de arquivos (MTP)”
+   - Instale drivers (Samsung USB Driver/Smart Switch, se for Samsung)
+   - `adb devices` deve listar seu aparelho como `device`
+4. Compile e instale o app no dispositivo:
+   ```bash
+   npx expo run:android
+   ```
+5. Inicie o bundler em modo Development Build e faça o túnel USB:
+   ```bash
+   npx expo start --dev-client -c
+   adb reverse tcp:8081 tcp:8081
+   ```
+6. Abra o app “Yawn Detector” no celular (não use Expo Go). O bundle JS será carregado pelo Metro (terminal do `expo start`).
+
+### 2) Como voltar a rodar depois de desligar/reiniciar
+1. Conecte o celular (Depuração USB ativa) e confirme:
+   ```bash
+   adb devices
+   ```
+2. Na pasta do projeto, apenas inicie o bundler no modo Development Build e faça o reverse (não precisa recompilar nativos):
+   ```bash
+   npx expo start --dev-client -c
+   adb reverse tcp:8081 tcp:8081
+   ```
+3. Abra o app “Yawn Detector” já instalado no celular. Se necessário, pressione `a` no terminal do Metro para abrir no Android.
+
+Observações importantes:
+- Expo Go não suporta `onnxruntime-react-native` nem VisionCamera/MediaPipe. Use sempre Development Build.
+- Em caso de alterações em bibliotecas nativas (ex.: instalar VisionCamera, Reanimated, ONNX):
+  - Rode novamente: `npx expo prebuild` e depois `npx expo run:android`.
+- Em caso de erro de conexão com o Metro:
+  - Rode `adb reverse tcp:8081 tcp:8081` e abra o app novamente.
+- Em muitos PCs, usar apenas dispositivo físico para câmera é obrigatório (emuladores podem não expor câmera adequadamente).
 
 ## Fluxo de autenticação (Fase 2)
 - Cliente Supabase: `services/supabase/client.ts`
@@ -142,6 +189,20 @@ Como testar:
 ```bash
 npx expo install expo-media-library
 ```
+- Erro: “Using Expo Go” no Metro → você deve iniciar com `--dev-client`. Use:
+  ```bash
+  npx expo start --dev-client -c
+  ```
+- Erro: “SDK location not found” → crie `android/local.properties`:
+  ```
+  sdk.dir=C:\\Users\\SEU_USUARIO\\AppData\\Local\\Android\\Sdk
+  ```
+- Erro de ADB não encontrado → defina `ANDROID_HOME`/`ANDROID_SDK_ROOT` e adicione `platform-tools` ao PATH. Valide com `where adb` e `adb version`.
+- Dispositivo não aparece no `adb devices` → troque o cabo USB (de dados), aceite o pop‑up de depuração no celular, instale drivers (Samsung USB Driver/Smart Switch) e garanta modo MTP.
+- Build falha com “ninja build.ninja dirty” (Windows) → limpe caches `.cxx`, `gradlew clean`, e force apenas `arm64-v8a`:
+  - `android/gradle.properties`: `reactNativeArchitectures=arm64-v8a`
+  - `android/app/build.gradle` → `defaultConfig { ndk { abiFilters 'arm64-v8a' } }`
+  - Refaça: `npx expo prebuild --clean && npx expo run:android`
 - Erro: "Cannot find module '@/screens/profile/ProfileScreen'" → arquivo não existe; use `HomeScreen` ou recrie a tela de perfil.
 - Variáveis não carregam → confirme prefixo `EXPO_PUBLIC_` e reinicie `npm start`.
 - Sessão não persiste → confirme `AsyncStorage` instalado e `AuthProvider` envolvendo o app.
