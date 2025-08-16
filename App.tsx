@@ -5,8 +5,6 @@ import { AuthProvider, useAuth } from '@/store/AuthContext';
 import LoginScreen from '@/screens/auth/LoginScreen';
 import RegisterScreen from '@/screens/auth/RegisterScreen';
 import HomeScreen from '@/screens/home/HomeScreen';
-// Temporário: rota de teste ONNX
-import TestONNXScreen from '@/screens/test/TestONNXScreen';
 
 const Root: React.FC = () => {
   const { session, initialized } = useAuth();
@@ -32,8 +30,6 @@ const Root: React.FC = () => {
   return (
     <View style={styles.container}>
       <HomeScreen />
-      {/* Descomente para testar o ONNX isoladamente */}
-      <TestONNXScreen />
       <StatusBar style="auto" />
     </View>
   );
