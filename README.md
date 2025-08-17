@@ -207,8 +207,3 @@ npx expo install expo-media-library
 - Variáveis não carregam → confirme prefixo `EXPO_PUBLIC_` e reinicie `npm start`.
 - Sessão não persiste → confirme `AsyncStorage` instalado e `AuthProvider` envolvendo o app.
 
-## Próximos passos
-- Fase 3: MediaPipe (câmera + extração de keypoints)
-- Fase 4: Detecção de bocejo (algoritmo + API externa)
-- Fase 5: Upload de imagens (Supabase Storage) e sincronização offline
-
