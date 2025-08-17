@@ -113,9 +113,7 @@ export class YawnDetector {
       this.window.shift();
     }
 
-    if (this.window.length < this.windowSize) {
-      return null; // Aguardando preencher a janela
-    }
+    if (this.window.length < this.windowSize) return null;
 
     const featureSize = this.window[0].length;
     const inputData = new Float32Array(this.windowSize * featureSize);
