@@ -12,6 +12,7 @@ export interface FaceMeshOptions {
 let currentOptions: FaceMeshOptions | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let plugin: any | null = null;
+let loadedPluginName: string | null = null;
 
 function tryInitPlugin(): void {
 	if (plugin) return;
@@ -22,12 +23,13 @@ function tryInitPlugin(): void {
 		minTrackingConfidence: 0.5,
 	} satisfies FaceMeshOptions;
 	// Tentar diferentes nomes comuns de plugin
-	const candidates = ['faceMesh', 'mediapipeFaceMesh', 'faceLandmarks'];
+	const candidates = ['faceLandmarks', 'faceMesh', 'mediapipeFaceMesh'];
 	for (const name of candidates) {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const p: any = VisionCameraProxy.initFrameProcessorPlugin?.(name, options);
 		if (p) {
 			plugin = p;
+			loadedPluginName = name;
 			break;
 		}
 	}
@@ -36,6 +38,8 @@ function tryInitPlugin(): void {
 export function initializeFaceMesh(options: FaceMeshOptions): void {
 	currentOptions = options;
 	tryInitPlugin();
+    // eslint-disable-next-line no-console
+    console.log('[MediaPipe] plugin:', loadedPluginName ?? 'not found');
 }
 
 // Para debug: opcionalmente expor uma função de log quando landmarks chegarem (JS thread)
@@ -53,7 +57,7 @@ export function detectLandmarksFromFrame(frame: any): FaceLandmarks | null {
 	// Integração real via plugin (inicializado no thread JS)
 	// @ts-expect-error plugin injected into worklet runtime
 	const p = plugin;
-	if (!p) return null;
+	if (!p) return { landmarks: [], confidence: -1, timestamp: Date.now() } as unknown as FaceLandmarks;
 	// Resultado esperado: array ou objeto com landmarks
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 	const result = p.call(frame);

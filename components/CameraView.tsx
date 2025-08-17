@@ -76,7 +76,7 @@ const CameraView: React.FC<CameraViewProps> = ({ onLandmarks, active = false, on
 				isActive={active}
 				format={format}
 				frameProcessor={frameProcessor}
-				pixelFormat="yuv"
+				pixelFormat="rgb"
 				onError={(e) => {
 					// Fechar câmera e informar usuário quando o SO restringir a câmera
 					const code: string = (e as unknown as { code?: string })?.code ?? '';

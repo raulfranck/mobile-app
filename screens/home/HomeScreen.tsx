@@ -67,7 +67,15 @@ const HomeScreen: React.FC = () => {
         <View style={styles.cameraContainer}>
           <CameraView
             active
-            onLandmarks={() => {}}
+            onLandmarks={(data) => {
+              if (data?.landmarks?.length) {
+                // eslint-disable-next-line no-console
+                console.log('[MediaPipe] first point:', data.landmarks[0]);
+              } else {
+                // eslint-disable-next-line no-console
+                console.log('[MediaPipe] no face');
+              }
+            }}
             onRequestClose={() => setCameraActive(false)}
             closeLabel="Parar"
           />

@@ -16,6 +16,11 @@ export function processFrameWorklet(frame: any, throttleEvery: number, onResult?
 	if (global.__frameCounter % throttleEvery !== 0) return;
 
 	const result = detectLandmarksFromFrame(frame);
-	if (result && onResult) onResult(result);
+	if (onResult) {
+		// Sempre reporta algo ao JS para confirmar execução do frameProcessor
+		// Quando não há rosto, envia estrutura vazia com timestamp
+		// @ts-expect-error worklet-to-js
+		onResult(result ?? { landmarks: [], confidence: 0, timestamp: Date.now() });
+	}
 }
 

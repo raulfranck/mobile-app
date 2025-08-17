@@ -20,9 +20,9 @@ object FaceLandmarkerHolder {
     val options = FaceLandmarker.FaceLandmarkerOptions.builder()
       .setBaseOptions(base)
       .setRunningMode(RunningMode.VIDEO)
-      .setMinFaceDetectionConfidence(0.7f)
-      .setMinFacePresenceConfidence(0.5f)
-      .setMinTrackingConfidence(0.5f)
+      .setMinFaceDetectionConfidence(0.3f)
+      .setMinFacePresenceConfidence(0.3f)
+      .setMinTrackingConfidence(0.3f)
       .setNumFaces(maxFaces)
       .build()
 
