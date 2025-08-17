@@ -11,7 +11,7 @@ Este documento orienta o desenvolvimento completo do aplicativo mobile de detec�
 ✅ **Dependências Instaladas** - Supabase, MediaPipe, Camera prontos
 
 ### 🎯 **Próximo Passo:** 
-**Fase 2 - Autenticação e Supabase** — Em andamento (cliente precisa configurar Supabase)
+**Fase 3 - MediaPipe e Câmera** — Em andamento
 
 ### 📱 **Como Testar Agora:**
 ```bash
@@ -28,7 +28,7 @@ npm start  # Inicia o servidor Expo
 
 ## 📋 Status Geral
 - [x] **Fase 1**: Configuração Base e Estrutura ✅ **COMPLETA**
-- [x] **Fase 2**: Autenticação e Supabase 🎯 **EM DESENVOLVIMENTO**
+- [x] **Fase 2**: Autenticação e Supabase ✅ **CONCLUÍDA**
 - [ ] **Fase 3**: MediaPipe e Câmera
 - [ ] **Fase 4**: Detecção de Bocejo
 - [ ] **Fase 5**: Storage e Sincronização
@@ -210,7 +210,7 @@ npm start
 ## 📱 **FASE 3: MediaPipe e Câmera**
 
 ### 3.1 Configuração do MediaPipe
-- [ ] `lib/mediapipe/config.ts` - Configuração base:
+- [x] `lib/mediapipe/config.ts` - Configuração base:
   ```typescript
   const mediapipeConfig = {
     runningMode: 'VIDEO',
@@ -223,16 +223,16 @@ npm start
 - [ ] `lib/mediapipe/landmarkExtractor.ts` - Extração de keypoints
 
 ### 3.2 Componente de Câmera
-- [ ] `components/CameraView.tsx` - Componente principal da câmera
+- [x] `components/CameraView.tsx` - Componente principal da câmera (preview inicial)
 - [ ] Implementar:
-  - [ ] Verificação de permissões
-  - [ ] Inicialização da câmera frontal
+  - [x] Verificação de permissões
+  - [x] Inicialização da câmera frontal (preview)
   - [ ] Resolução 640x480
-  - [ ] Throttling (processar 1 de cada 10 frames)
+  - [x] Throttling (processar 1 de cada 10 frames)
 
 ### 3.3 Processamento de Frames
 - [ ] `lib/mediapipe/frameProcessor.ts` - Processamento em background
-- [ ] `types/mediapipe.ts` - Tipagens para landmarks
+- [x] `types/mediapipe.ts` - Tipagens para landmarks
 - [ ] Implementar:
   - [ ] Extração de keypoints faciais (468 pontos)
   - [ ] Cálculo da razão de aspecto da boca
