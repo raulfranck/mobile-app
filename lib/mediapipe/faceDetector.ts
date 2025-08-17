@@ -38,6 +38,14 @@ export function initializeFaceMesh(options: FaceMeshOptions): void {
 	tryInitPlugin();
 }
 
+// Para debug: opcionalmente expor uma função de log quando landmarks chegarem (JS thread)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function logFirstLandmark(data: FaceLandmarks | null): void {
+	if (!data || !data.landmarks?.length) return;
+	// eslint-disable-next-line no-console
+	console.log('[MediaPipe] first point:', data.landmarks[0]);
+}
+
 // Worklet: quando integrarmos react-native-mediapipe, este método chamará o JSI nativo
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function detectLandmarksFromFrame(frame: any): FaceLandmarks | null {

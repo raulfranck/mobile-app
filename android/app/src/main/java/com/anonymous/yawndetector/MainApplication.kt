@@ -6,7 +6,6 @@ import android.content.res.Configuration
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactNativeHost
-import com.facebook.react.ReactPackage
 import com.facebook.react.ReactHost
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactNativeHost
@@ -15,6 +14,7 @@ import com.facebook.soloader.SoLoader
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ReactNativeHostWrapper
+import com.facebook.react.ReactPackage
 
 class MainApplication : Application(), ReactApplication {
 
@@ -24,7 +24,11 @@ class MainApplication : Application(), ReactApplication {
           override fun getPackages(): List<ReactPackage> {
             val packages = PackageList(this).packages
             // Packages that cannot be autolinked yet can be added manually here, for example:
-            // packages.add(MyReactNativePackage())
+            try {
+              val cls = Class.forName("com.anonymous.yawndetector.mediapipe.FaceLandmarksFrameProcessorPluginPackage")
+              val instance = cls.getDeclaredConstructor().newInstance() as ReactPackage
+              packages.add(instance)
+            } catch (_: Throwable) {}
             return packages
           }
 
@@ -48,6 +52,11 @@ class MainApplication : Application(), ReactApplication {
       load()
     }
     ApplicationLifecycleDispatcher.onApplicationCreate(this)
+    try {
+      val holder = Class.forName("com.anonymous.yawndetector.mediapipe.FaceLandmarkerHolder")
+      val method = holder.getDeclaredMethod("initialize", android.content.Context::class.java, String::class.java, Int::class.javaPrimitiveType)
+      method.invoke(null, applicationContext, "face_landmarker.task", 1)
+    } catch (_: Throwable) {}
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {
