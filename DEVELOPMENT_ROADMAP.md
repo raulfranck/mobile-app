@@ -219,22 +219,23 @@ npm start
     minTrackingConfidence: 0.5
   };
   ```
-- [ ] `lib/mediapipe/faceDetector.ts` - Wrapper do face detection
-- [ ] `lib/mediapipe/landmarkExtractor.ts` - Extração de keypoints
+- [x] `lib/mediapipe/faceDetector.ts` - Wrapper do face detection (stub inicial)
+- [x] `lib/mediapipe/landmarkExtractor.ts` - Extração/conversão de keypoints (stub)
 
 ### 3.2 Componente de Câmera
-- [x] `components/CameraView.tsx` - Componente principal da câmera (preview inicial)
+- [x] `components/CameraView.tsx` - Componente principal da câmera (preview + overlay “Parar”)
 - [ ] Implementar:
-  - [x] Verificação de permissões
+  - [x] Verificação de permissões sob demanda (botão Iniciar)
   - [x] Inicialização da câmera frontal (preview)
-  - [ ] Resolução 640x480
+  - [x] Tentar resolução 640x480 quando disponível
   - [x] Throttling (processar 1 de cada 10 frames)
+  - [x] Tratamento de erro `camera-is-restricted`
 
 ### 3.3 Processamento de Frames
-- [ ] `lib/mediapipe/frameProcessor.ts` - Processamento em background
+- [x] `lib/mediapipe/frameProcessor.ts` - Processamento em background (stub com throttle)
 - [x] `types/mediapipe.ts` - Tipagens para landmarks
 - [ ] Implementar:
-  - [ ] Extração de keypoints faciais (468 pontos)
+  - [ ] Extração de keypoints faciais (468 pontos) via react-native-mediapipe
   - [ ] Cálculo da razão de aspecto da boca
   - [ ] Detecção de confiança > 0.7
 
@@ -469,11 +470,11 @@ npm start
 ## 🎯 **Métricas de Progresso**
 
 ```
-📊 PROGRESSO GERAL: 21.4% (1.5/7 fases)
+📊 PROGRESSO GERAL: 25% (1.75/7 fases)
 
 ✅ FASE 1: 100% - Configuração Base
 🚧 FASE 2:  60% - Autenticação e Supabase  
-⏳ FASE 3:   0% - MediaPipe e Câmera
+⏳ FASE 3:  25% - MediaPipe e Câmera
 ⏳ FASE 4:   0% - Detecção de Bocejo
 ⏳ FASE 5:   0% - Storage e Sincronização
 ⏳ FASE 6:   0% - UI/UX e Relatórios

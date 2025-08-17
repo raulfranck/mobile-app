@@ -1,17 +1,28 @@
 import React, { useRef } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Alert, StyleSheet, View, Text } from 'react-native';
 import { Camera, useCameraDevice, useFrameProcessor } from 'react-native-vision-camera';
 import { Worklets } from 'react-native-worklets-core';
 import { CAMERA_FRAME_THROTTLE } from '@/lib/mediapipe/config';
 import type { FaceLandmarks, Landmark } from '@/lib/mediapipe/types';
+import { processFrameWorklet } from '@/lib/mediapipe/frameProcessor';
 
 interface CameraViewProps {
 	onLandmarks?: (data: FaceLandmarks) => void;
 	active?: boolean;
+	onRequestClose?: () => void;
+	closeLabel?: string;
 }
 
-const CameraView: React.FC<CameraViewProps> = ({ onLandmarks, active = false }) => {
+const CameraView: React.FC<CameraViewProps> = ({ onLandmarks, active = false, onRequestClose, closeLabel = 'Parar' }) => {
 	const device = useCameraDevice('front') ?? useCameraDevice('back');
+	const format = React.useMemo(() => {
+		if (!device || !('formats' in device)) return undefined as unknown as undefined;
+		// selecionar 640x480 se existir
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const fmts: any[] = (device as unknown as { formats?: any[] }).formats ?? [];
+		const preferred = fmts.find((f) => f?.videoWidth === 640 && f?.videoHeight === 480);
+		return preferred ?? fmts[0];
+	}, [device]);
 	const frameCountRef = useRef<number>(0);
 	const onLandmarksOnJS = React.useMemo(() => (onLandmarks ? Worklets.createRunOnJS(onLandmarks) : undefined), [onLandmarks]);
 
@@ -19,16 +30,7 @@ const CameraView: React.FC<CameraViewProps> = ({ onLandmarks, active = false }) 
 	// FrameProcessor nativo (worklet). Integração real MediaPipe entrará aqui.
 	const frameProcessor = useFrameProcessor((frame) => {
 		'worklet';
-		// throttle simples por contador global
-		// @ts-expect-error worklet global
-		if (!global.__frameCounter) global.__frameCounter = 0;
-		// @ts-expect-error worklet global
-		global.__frameCounter = (global.__frameCounter + 1) | 0;
-		// @ts-expect-error worklet global
-		if (global.__frameCounter % CAMERA_FRAME_THROTTLE !== 0) return;
-
-		const data: FaceLandmarks = { landmarks: [] as unknown as Landmark[], confidence: 0, timestamp: Date.now() };
-		if (onLandmarksOnJS) onLandmarksOnJS(data);
+		processFrameWorklet(frame, CAMERA_FRAME_THROTTLE, onLandmarksOnJS);
 	}, [onLandmarksOnJS]);
 
 	if (!device || !active) {
@@ -36,17 +38,72 @@ const CameraView: React.FC<CameraViewProps> = ({ onLandmarks, active = false }) 
 	}
 
 	return (
-		<Camera
-			style={StyleSheet.absoluteFill}
-			device={device}
-			isActive={active}
-			frameProcessor={frameProcessor}
-		/>
+		<View style={StyleSheet.absoluteFill}>
+			<Camera
+				style={StyleSheet.absoluteFill}
+				device={device}
+				isActive={active}
+				format={format}
+				frameProcessor={frameProcessor}
+				onError={(e) => {
+					// Fechar câmera e informar usuário quando o SO restringir a câmera
+					const code: string = (e as unknown as { code?: string })?.code ?? '';
+					if (code.includes('camera-is-restricted')) {
+						Alert.alert(
+							'Câmera restrita pelo sistema',
+							'Acesso à câmera está desativado pelo sistema. Verifique: Configurações > Privacidade > Acesso à Câmera (ativar), e permissões do app.',
+						);
+						if (onRequestClose) onRequestClose();
+					} else {
+						Alert.alert('Erro da Câmera', e?.message ?? 'Erro desconhecido');
+					}
+				}}
+			/>
+			{onRequestClose && (
+				<View style={styles.topBar}>
+					<View style={styles.topBarContent}>
+						<View style={styles.spacer} />
+						<View style={styles.actions}>
+							<View style={styles.actionButton}>
+								{/* Using Text-only button for simplicity */}
+								{/* eslint-disable-next-line react-native/no-inline-styles */}
+								<Text onPress={onRequestClose} style={{ color: '#fff', fontWeight: '700', fontSize: 16 }}>
+									{closeLabel}
+								</Text>
+							</View>
+						</View>
+					</View>
+				</View>
+			)}
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
 	center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#000' },
+	topBar: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		paddingTop: 32,
+		paddingHorizontal: 16,
+		paddingBottom: 12,
+		backgroundColor: 'rgba(0,0,0,0.35)'
+	},
+	 topBarContent: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'space-between',
+	},
+	spacer: { width: 24, height: 24 },
+	actions: { flexDirection: 'row', gap: 12 },
+	actionButton: {
+		paddingVertical: 6,
+		paddingHorizontal: 12,
+		borderRadius: 8,
+		backgroundColor: 'rgba(255,255,255,0.15)'
+	},
 });
 
 export default CameraView;

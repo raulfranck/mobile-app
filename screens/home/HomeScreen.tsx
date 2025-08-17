@@ -65,7 +65,12 @@ const HomeScreen: React.FC = () => {
       </TouchableOpacity>
       {cameraActive && (
         <View style={styles.cameraContainer}>
-          <CameraView active onLandmarks={() => {}} />
+          <CameraView
+            active
+            onLandmarks={() => {}}
+            onRequestClose={() => setCameraActive(false)}
+            closeLabel="Parar"
+          />
         </View>
       )}
     </View>
