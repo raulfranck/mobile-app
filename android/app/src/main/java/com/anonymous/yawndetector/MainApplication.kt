@@ -29,6 +29,9 @@ class MainApplication : Application(), ReactApplication {
               val instance = cls.getDeclaredConstructor().newInstance() as ReactPackage
               packages.add(instance)
             } catch (_: Throwable) {}
+            
+            // Removido: pacote do módulo direto MediaPipe
+            
             return packages
           }
 
@@ -56,7 +59,7 @@ class MainApplication : Application(), ReactApplication {
       val holder = Class.forName("com.anonymous.yawndetector.mediapipe.FaceLandmarkerHolder")
       val method = holder.getDeclaredMethod("initialize", android.content.Context::class.java, String::class.java, Int::class.javaPrimitiveType)
       method.invoke(null, applicationContext, "face_landmarker.task", 1)
-    } catch (_: Throwable) {}
+    } catch (_: Throwable) { }
   }
 
   override fun onConfigurationChanged(newConfig: Configuration) {

@@ -27,6 +27,12 @@ const CameraView: React.FC<CameraViewProps> = ({ onLandmarks, active = false, on
 	}, [device]);
 	const frameCountRef = useRef<number>(0);
 	const onLandmarksOnJS = React.useMemo(() => (onLandmarks ? Worklets.createRunOnJS(onLandmarks) : undefined), [onLandmarks]);
+	const debugLog = React.useMemo(() => Worklets.createRunOnJS((w: number, h: number, pf: string) => {
+		// eslint-disable-next-line no-console
+		console.log('[Frame]', w, h, pf);
+	}), []);
+	
+	// Removido: processamento no thread JS (manter apenas worklet)
 
 	// ONNX YawnDetector
 	const yawnDetectorRef = React.useRef<YawnDetector | null>(null);
@@ -37,32 +43,24 @@ const CameraView: React.FC<CameraViewProps> = ({ onLandmarks, active = false, on
 
 	React.useEffect(() => {
 		if (active) {
-			try {
-				initializeFaceMesh(mediapipeConfig);
-			} catch {}
-			// inicializa ONNX detector (somente 1x)
-			if (!yawnDetectorRef.current) {
-				const det = new YawnDetector();
-				// modelo deve estar em assets; ajuste o path/URI conforme ONNX_INTEGRATION.md
-				// eslint-disable-next-line @typescript-eslint/no-floating-promises
-				det.initializeFromUri('assets/models/model_lstm_3_45_euclidean.onnx').then(() => {
-					yawnDetectorRef.current = det;
-				}).catch(() => {
-					// Ignora erro de ambiente; Dev Client obrigatório
-				});
-			}
+			initializeFaceMesh({
+				runningMode: mediapipeConfig.runningMode,
+				maxNumFaces: mediapipeConfig.maxNumFaces,
+				minDetectionConfidence: mediapipeConfig.minDetectionConfidence,
+				minTrackingConfidence: mediapipeConfig.minTrackingConfidence,
+			});
 		}
 	}, [active]);
 
 
-	// FrameProcessor nativo (worklet). Integração real MediaPipe entrará aqui.
+	// FrameProcessor: throttle + plugin MediaPipe (worklet)
 	const frameProcessor = useFrameProcessor((frame) => {
 		'worklet';
-		processFrameWorklet(frame, CAMERA_FRAME_THROTTLE, (landmarks) => {
-			if (onLandmarksOnJS) onLandmarksOnJS(landmarks);
-			// futura integração: enviar landmarks ao ONNX no thread JS (não dentro do worklet)
-		});
-	}, [onLandmarksOnJS]);
+		// debug básico
+		if (debugLog) debugLog(frame.width as unknown as number, frame.height as unknown as number, String(frame.pixelFormat));
+		// processar 1 a cada N frames
+		processFrameWorklet(frame, CAMERA_FRAME_THROTTLE, onLandmarksOnJS);
+	}, []);
 
 	if (!device || !active) {
 		return <View style={styles.center} />;
@@ -76,7 +74,7 @@ const CameraView: React.FC<CameraViewProps> = ({ onLandmarks, active = false, on
 				isActive={active}
 				format={format}
 				frameProcessor={frameProcessor}
-				pixelFormat="rgb"
+				pixelFormat="yuv"
 				onError={(e) => {
 					// Fechar câmera e informar usuário quando o SO restringir a câmera
 					const code: string = (e as unknown as { code?: string })?.code ?? '';

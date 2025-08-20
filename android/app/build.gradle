@@ -2,6 +2,13 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+// Download plugin for fetching MediaPipe model into assets
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath "de.undercouch:gradle-download-task:5.6.0" }
+}
+apply plugin: "de.undercouch.download"
+
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
 /**
@@ -126,6 +133,24 @@ android {
         ignoreAssetsPattern '!.svn:!.git:!.ds_store:!*.scc:!CVS:!thumbs.db:!picasa.ini:!*~'
     }
 }
+
+// --- Auto-download MediaPipe model into app/src/main/assets ---
+def assetDir = new File(projectDir, "src/main/assets")
+def faceTaskUrl = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
+
+tasks.register("createAssetsDir") {
+    doLast {
+        if (!assetDir.exists()) assetDir.mkdirs()
+    }
+}
+
+tasks.register("downloadFaceTaskAsset", de.undercouch.gradle.tasks.download.Download) {
+    src faceTaskUrl
+    dest new File(assetDir, "face_landmarker.task")
+    overwrite false
+}
+
+preBuild.dependsOn("createAssetsDir", "downloadFaceTaskAsset")
 
 // Apply static values from `gradle.properties` to the `android.packagingOptions`
 // Accepts values in comma delimited lists, example:
